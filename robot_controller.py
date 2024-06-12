@@ -10,6 +10,39 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind(('192.168.1.179',65432))
 server_socket.listen(1)
 
+
+topics = ["Where", "When", "Who", "Other"]
+
+questions = {
+    "Who": ["Who is in the photo?", "Can you tell me more about the people in the photo?", "Who else was there?"],
+    "Where": ["Where was this photo taken?", "What can you tell me about this place?", "Is this place special to you?"],
+    "When": ["When was this photo taken?", "What time of the year was it?", "How old were you when this photo was "
+                                                                            "taken?"],
+    "Other": ["Is there anything else you can tell me about this photo?", "What memories does this photo bring back?",
+              "Why is this photo important to you?"]
+}
+
+current_topic_index = 0
+current_question_index = 0
+question_count = 0
+
+def get_next_question():
+    global current_topic_index, current_question_index
+    if current_topic_index < len(topics):
+        topic = topics[current_topic_index]
+        if current_question_index < len(questions[topic]):
+            question = questions[topic][current_question_index]
+            current_question_index += 1
+            return question
+        else:
+            current_question_index = 0
+            current_topic_index += 1
+            return get_next_question()
+    else:
+        return "Thank you for sharing the information about the photo!"
+
+
+
 def main():
     # 设置机器人 IP 和端口
     robot_ip = "192.168.1.91"  # 替换为你的机器人 IP 地址
@@ -29,6 +62,8 @@ def main():
     
 	# let the robot talks
     tts.say("Hello, I am a Nao robot. How can I assist you today?")
+    initial_prompt = get_next_question()
+    print("AI:", initial_prompt)
     data = server_module.server(server_socket)
     # extract tge feedback part
     feedback = ""
