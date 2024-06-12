@@ -40,6 +40,14 @@ def get_next_question():
         return "Thank you for sharing the information about the photo!"
         
 
+def extract_feedback(conversation_string):
+    feedback = ""
+    for line in conversation_string.split('\n'):
+        if "feedback:" in line:
+            feedback = line.split("feedback:")[1].strip()
+            break
+    return feedback
+
 def main():
     # 设置机器人 IP 和端口
     robot_ip = "192.168.1.91"  # 替换为你的机器人 IP 地址
@@ -62,18 +70,17 @@ def main():
 
     conn, addr = server_socket.accept()
     print("Connected by", addr)
-    all_data = []
     
     while True:
+        data = conn.recv(1024)
         initial_prompt = get_next_question()
         tts.say(initial_prompt)
-        data = conn.recv(1024)
         if not data:
             break
         print("Received from client:", data)
-        all_data.append(data.decode('utf-8'))
         conn.sendall(b"Server received: " + data)
-        tts.say(str(data))
+        feedback = extract_feedback(data)
+        tts.say(str(feedback))
 
     conn.close()
 
