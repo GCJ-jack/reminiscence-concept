@@ -58,7 +58,7 @@ def main():
     try:
         session.connect("tcp://" + robot_ip + ":" + str(robot_port))
         print("Connected to the robot at", robot_ip)
-    except RuntimeError:
+    except :
         print("Can't connect to Naoqi at ip \"" + robot_ip + "\" on port " + str(robot_port) + ".\nPlease check your script arguments. Run with -h option for help.")
         sys.exit(1)
         
@@ -67,20 +67,24 @@ def main():
     
 	# let the robot talks
     tts.say("Hello, I am a Nao robot. How can I assist you today?")
-
     conn, addr = server_socket.accept()
-    print("Connected by", addr)
+
+    if server_socket.accept():
+        print("Connected by", addr)
+        initial_prompt = get_next_question()
+        tts.say(initial_prompt)
+    else
     
     while True:
         data = conn.recv(1024)
-        initial_prompt = get_next_question()
-        tts.say(initial_prompt)
         if not data:
             break
         print("Received from client:", data)
-        conn.sendall(b"Server received: " + data)
         feedback = extract_feedback(data)
         tts.say(str(feedback))
+        next_prompt = get_next_question()
+        tts.say(next_prompt)
+        conn.sendall(next_prompt.encode('utf-8'))
 
     conn.close()
 
