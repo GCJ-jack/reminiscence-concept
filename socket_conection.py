@@ -14,7 +14,7 @@ def server(server_socket):
         print("Received from client:", data)
         all_data.append(data.decode('utf-8'))
         conn.sendall(b"Server received: " + data)
-    
+
     conn.close()
 
 if __name__ == "__main__":
