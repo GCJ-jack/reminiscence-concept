@@ -66,7 +66,7 @@ def main():
     
     while True:
         initial_prompt = get_next_question()
-        tts.say("initial_prompt")
+        tts.say(initial_prompt)
         data = conn.recv(1024)
         if not data:
             break
