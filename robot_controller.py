@@ -74,11 +74,11 @@ def main():
     while True:
         data = conn.recv(1024)
         initial_prompt = get_next_question()
+        conn.sendall(initial_prompt.encode('utf-8'))
         tts.say(initial_prompt)
         if not data:
             break
         print("Received from client:", data)
-        conn.sendall(b"Server received: " + data)
         feedback = extract_feedback(data)
         tts.say(str(feedback))
 
