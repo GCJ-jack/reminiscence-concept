@@ -2,6 +2,7 @@
 import qi
 import sys
 import socket
+import threading
 
 
 
@@ -48,6 +49,30 @@ def extract_feedback(conversation_string):
             break
     return feedback
 
+def handle_client(conn, tts):
+    try:
+        initial_prompt = get_next_question()
+        conn.sendall(initial_prompt.encode('utf-8'))
+        tts.say(initial_prompt)
+        conn.sendall(b"done")  # Notify the client that tts.say is done
+    except Exception as e:
+        print(f"Failed to handle initial prompt: {e}")
+
+    while True:
+        data = conn.recv(1024)
+        if not data:
+            break
+        print("Received from client:", data.decode('utf-8'))
+        feedback = extract_feedback(data.decode('utf-8'))
+        tts.say(str(feedback))
+        conn.sendall(b"done")  # Notify the client that tts.say is done
+        next_prompt = get_next_question()
+        tts.say(next_prompt)
+        conn.sendall(next_prompt.encode('utf-8'))
+        conn.sendall(b"done")  # Notify the client that tts.say is done again
+
+    conn.close()
+
 def main():
     # 设置机器人 IP 和端口
     robot_ip = "192.168.1.91"  # 替换为你的机器人 IP 地址
@@ -67,29 +92,11 @@ def main():
     
 	# let the robot talks
     tts.say("Hello, I am a Nao robot. How can I assist you today?")
-    try:
+    
+    while True:
         conn, addr = server_socket.accept()
         print("Connected by", addr)
-        initial_prompt = get_next_question()
-        conn.sendall(initial_prompt.encode('utf-8'))
-        tts.say(initial_prompt)
-    except Exception as e:
-        print("Failed to accept connection: {e}")
-        sys.exit(1)  # Exit the main function
-
-
-    while True:
-        data = conn.recv(1024)
-        if not data:
-            break
-        print("Received from client:", data)
-        feedback = extract_feedback(data)
-        tts.say(str(feedback))
-        next_prompt = get_next_question()
-        tts.say(next_prompt)
-        conn.sendall(next_prompt.encode('utf-8'))
-
-    conn.close()
+        threading.Thread(target=handle_client, args=(conn, tts)).start()
 
 
 if __name__ == "__main__":
