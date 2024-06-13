@@ -68,9 +68,8 @@ def handle_client(conn, tts):
         conn.sendall(b"done")  # Notify the client that tts.say is done
         next_prompt = get_next_question()
         tts.say(next_prompt)
-        conn.sendall(next_prompt.encode('utf-8'))
         conn.sendall(b"done")  # Notify the client that tts.say is done again
-
+        conn.sendall(next_prompt.encode('utf-8'))
     conn.close()
 
 def main():
