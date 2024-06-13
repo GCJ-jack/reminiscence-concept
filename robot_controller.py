@@ -67,8 +67,6 @@ def main():
     
 	# let the robot talks
     tts.say("Hello, I am a Nao robot. How can I assist you today?")
-    conn, addr = server_socket.accept()
-
     try:
         conn, addr = server_socket.accept()
         print("Connected by", addr)
@@ -76,7 +74,7 @@ def main():
         conn.sendall(initial_prompt.encode('utf-8'))
         tts.say(initial_prompt)
     except Exception as e:
-        print(f"Failed to accept connection: {e}")
+        print("Failed to accept connection: {e}")
         sys.exit(1)  # Exit the main function
 
 
