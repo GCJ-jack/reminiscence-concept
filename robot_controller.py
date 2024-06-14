@@ -56,7 +56,7 @@ def handle_client(conn, tts):
         tts.say(initial_prompt)
         conn.sendall(b"done")  # Notify the client that tts.say is done
     except Exception as e:
-        print(f"Failed to handle initial prompt: {e}")
+        print("Failed to handle initial prompt: {e}")
 
     while True:
         data = conn.recv(1024)
@@ -68,6 +68,7 @@ def handle_client(conn, tts):
         conn.sendall(b"done")  # Notify the client that tts.say is done
         next_prompt = get_next_question()
         tts.say(next_prompt)
+        print(next_prompt)
         conn.sendall(next_prompt.encode('utf-8'))
         conn.sendall(b"done")  # Notify the client that tts.say is done again
 
