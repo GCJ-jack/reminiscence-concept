@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-import qi
+# import qi
 import sys
 import socket
 import threading
 
-
-
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(('192.168.1.179',65432))
+server_socket.bind(('192.168.1.182', 65432))
 server_socket.listen(1)
 
 topics = ["Where", "When", "Who", "Other"]
@@ -25,6 +23,7 @@ current_topic_index = 0
 current_question_index = 0
 question_count = 0
 
+
 def get_next_question():
     global current_topic_index, current_question_index
     if current_topic_index < len(topics):
@@ -39,7 +38,7 @@ def get_next_question():
             return get_next_question()
     else:
         return "Thank you for sharing the information about the photo!"
-        
+
 
 def extract_feedback(conversation_string):
     feedback = ""
@@ -49,6 +48,7 @@ def extract_feedback(conversation_string):
             break
     return feedback
 
+
 def handle_client(conn, tts):
     try:
         initial_prompt = get_next_question()
@@ -56,7 +56,7 @@ def handle_client(conn, tts):
         tts.say(initial_prompt)
         conn.sendall(b"done")  # Notify the client that tts.say is done
     except Exception as e:
-        print("Failed to handle initial prompt: {e}")
+        print(f"Failed to handle initial prompt: {e}")
 
     while True:
         data = conn.recv(1024)
@@ -72,6 +72,7 @@ def handle_client(conn, tts):
         conn.sendall(b"done")  # Notify the client that tts.say is done again
     conn.close()
 
+
 def main():
     # 设置机器人 IP 和端口
     robot_ip = "192.168.1.91"  # 替换为你的机器人 IP 地址
@@ -82,16 +83,17 @@ def main():
     try:
         session.connect("tcp://" + robot_ip + ":" + str(robot_port))
         print("Connected to the robot at", robot_ip)
-    except :
-        print("Can't connect to Naoqi at ip \"" + robot_ip + "\" on port " + str(robot_port) + ".\nPlease check your script arguments. Run with -h option for help.")
+    except:
+        print("Can't connect to Naoqi at ip \"" + robot_ip + "\" on port " + str(
+            robot_port) + ".\nPlease check your script arguments. Run with -h option for help.")
         sys.exit(1)
-        
-	# using ALTextSpeech service
+
+    # using ALTextSpeech service
     tts = session.service("ALTextToSpeech")
-    
-	# let the robot talks
+
+    # let the robot talks
     tts.say("Hello, I am a Nao robot. How can I assist you today?")
-    
+
     while True:
         conn, addr = server_socket.accept()
         print("Connected by", addr)
