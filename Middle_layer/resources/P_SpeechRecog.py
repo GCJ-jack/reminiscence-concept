@@ -2,6 +2,8 @@
 # -*- encoding: UTF-8 -*-
 
 """Example: Use say Method"""
+import logging
+
 import qi
 import argparse
 import sys

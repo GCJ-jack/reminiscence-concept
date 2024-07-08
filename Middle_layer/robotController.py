@@ -1,4 +1,5 @@
 #!/usr/bin/python2.7
+import socket
 import qi
 import sys
 import time
@@ -82,11 +83,40 @@ class Robot(object):
 
 
 		self.launch_robot()
+		self.server_socket = None
+		self.init_socket()
 
+	def init_socket(self):
+		self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.server_socket.bind(('0.0.0.0', 65432))  # Bind to all interfaces for demo purposes
+		self.server_socket.listen(5)
+		print("Socket server listening on port 65432")
+		threading.Thread(target=self.accept_connections).start()
 
+	def accept_connections(self):
+		while True:
+			client_socket, addr = self.server_socket.accept()
+			print(f"Connected by {addr}")
+			threading.Thread(target=self.handle_client, args=(client_socket,)).start()
 
-	
+	def handle_client(self, client_socket):
+		try:
+			while True:
+				data = client_socket.recv(1024)  # 接收数据
+				if not data:
+					break
+				print("Received from client:", data.decode('utf-8'))  # 打印接收到的数据
+				response = "Hello from Robot"  # 准备响应消息
+				client_socket.sendall(response.encode('utf-8'))  # 发送响应
+		finally:
+			client_socket.close()  # 确保关闭连接
 
+	def send_message(self, message):
+		if hasattr(self, 'client_socket'):  # 检查是否存在client_socket属性
+			try:
+				self.client_socket.sendall(message.encode('utf-8'))  # 发送消息
+			except Exception as e:
+				print(f"Error sending message to client: {e}")  # 打印错误信息
 
 	def launch_robot(self):
 
@@ -104,20 +134,22 @@ class Robot(object):
 		self.face_tracking()
 
 	def connect_session(self):
+		"""
+        Attempts to connect to the robot using the provided IP address and port.
+        Prints the connection status and handles exceptions.
+        """
+		robot_ip = self.settings['IpRobot']  # Improved variable naming for clarity
+		port = self.settings['port']  # Direct access, assuming port is stored correctly
 
-		print self.settings['IpRobot']
-
-		print "tcp://" + self.settings['IpRobot'] + ":" + str(self.settings['port'])
-
-		self.robotIp = self.settings['IpRobot']
-		self.port = str(self.settings['port'])
+		# Creating the connection string
+		connection_string = f"tcp://{robot_ip}:{port}"
+		print(f"Attempting to connect to the robot at {connection_string}")
 
 		try:
-			self.session.connect("tcp://" + self.robotIp + ":" + str(self.port))
-
-		except RuntimeError:
-
-			print "Can't connect to Naoqi at ip"
+			self.session.connect(connection_string)
+			print("Successfully connected to Naoqi.")
+		except RuntimeError as e:  # More specific exception handling
+			print(f"Failed to connect to Naoqi at {connection_string}. Error: {e}")
 
 	def get_services(self):
 
