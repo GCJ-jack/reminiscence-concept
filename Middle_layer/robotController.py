@@ -80,15 +80,13 @@ class Robot(object):
 		self.me_flag = False
 
 
-
-
 		self.launch_robot()
 		self.server_socket = None
 		self.init_socket()
 
 	def init_socket(self):
 		self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.server_socket.bind(('0.0.0.0', 65432))  # Bind to all interfaces for demo purposes
+		self.server_socket.bind(('192.168.1.182', 65432))  # Bind to all interfaces for demo purposes
 		self.server_socket.listen(5)
 		print("Socket server listening on port 65432")
 		threading.Thread(target=self.accept_connections).start()
@@ -1260,22 +1258,33 @@ class Robot(object):
 
 '''
 
-'''
 
-#Testing function
 def main():
-
+	# Initialize the Robot instance
 	robot = Robot()
-	#robot.launch_robot()
+
+	# Allow some time for system initialization
 	time.sleep(6)
+
+	# Start the face tracking feature
 	robot.face_tracking()
+
+	# Welcome the user with a greeting sentence
 	robot.welcome_sentence()
-	robot.image_validation(m=True)
+
+	# Validate the image and provide feedback
+	robot.image_validation(is_valid=True)
+
+	# Comment on the photos processed
 	robot.commenting_photos()
-	robot.set_personrecognized(num = 5)
 
-A = main()
+	# Recognize and handle person count
+	robot.set_personrecognized(num=5)
 
-'''
+
+if __name__ == "__main__":
+	main()
+
+
 
 
